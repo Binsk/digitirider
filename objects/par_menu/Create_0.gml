@@ -36,6 +36,7 @@ function AnchorElement(anchor=undefined, margin=undefined) constructor{
     #endregion
     
     #region METHODS
+
     function set_anchor(anchor){
         if (not is_struct(anchor))
             return false;

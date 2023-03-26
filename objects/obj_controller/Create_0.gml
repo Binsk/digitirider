@@ -144,20 +144,21 @@ function process_state(new_state, key_array=[]){
         
         // If there is a sub-state, process that itself
         if (is_struct(old_value)){
-            var array = array_duplicate_shallow(key_array);
+            var array = array_create(array_length(key_array));
+            array_copy(array, 0, key_array, 0, array_length(key_array));
             array_push(array, keys[i]);
             process_state(new_value, array);
             continue;
         }
-        
+
         // Calculate the base signal label. E.g.: "face.left.east"
-        var label = glue(".", key_array) + sprintf(".%1", keys[i]);
+        var label = glue(".", key_array) + string_substitute(".{}", keys[i]);
         // If not a sub-state, compare values and signal as needed
         if (is_int64(old_value)){
                 // State change, signal.
                 // E.g., "face.left.east.pressed"
             if (old_value != new_value and (old_value & 1 == 0 or new_value & 1 == 0))
-                signaler.signal(sprintf("%1.%2", label, new_value & 2 ? "pressed" : "released"));
+                signaler.signal(string_substitute("{0}.{1}", [label, new_value & 2 ? "pressed" : "released"]));
             
                 // If down, signal:
                 // E.g., "face.left.east"

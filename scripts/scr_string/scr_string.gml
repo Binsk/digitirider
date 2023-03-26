@@ -87,3 +87,27 @@ function string_explode(delim, str, keepempty=true){
         
     return slices;
 }
+
+///	@desc	Takes an array and 'glue' and returns a string
+///			of all elements glued together.
+///	@param	{string}	glue			glue to place between elements
+///	@param	{array}		array			array of values to glue together
+///	@param	{real}		start=0			index to begin at
+///	@param	{real}		count=all		number of array slots to include (infinity = all)
+///										Supports negative indices so -1 = array_length - 1 (non-inclusive)
+///	@return {string}
+function glue(_glue, _array, start=0, count=infinity){
+	if (not is_array(_array))
+		return string(_array);
+	
+	var max_count = (count >= 0 ? min(count, array_length(_array)) : max(0, array_length(_array) + count));
+		
+	var str = "";
+	for (var i = start; i < max_count; ++i){
+		if (i == start)
+			str = string(_array[i])
+		else
+			str += _glue + string(_array[i]);
+	}
+	return str;
+}
