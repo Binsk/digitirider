@@ -137,9 +137,6 @@ function MenuCheckbox(label="", is_checked=false, anchor=undefined, margin=undef
         var corner2_pos = get_position(1, 1);
         var center_pos = get_position();
         
-        // draw_set_color(color);
-        // draw_set_alpha(alpha);
-        
         draw_text(corner1_pos.x + 8, center_pos.y, label);
         draw_rectangle(corner2_pos.x - 8, center_pos.y - 12, corner2_pos.x - 31, center_pos.y + 12, true);
         if (is_checked)
