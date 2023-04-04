@@ -27,7 +27,6 @@ vformat_color = vertex_format_end();
 
 // Vertex format pipe
 vertex_format_begin(); // Coords are calculate in the shader
-// vertex_format_add_custom(vertex_type_float3, vertex_usage_normal);
 vertex_format_add_normal();
 vertex_format_add_texcoord();
 vformat_pipe = vertex_format_end();

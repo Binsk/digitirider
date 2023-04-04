@@ -31,7 +31,7 @@ function PipeMorph(theta=0, phi=0, unroll=0) constructor {
     function construct_array_lerp(morph, mlerp=0.5, ring_count=32){
         var a1 = construct_array(ring_count);
         var a2 = morph.construct_array(ring_count);
-        var array = array_create(ring_count * 3, 0.0);
+        var array = array_create(ring_count * 3, 1.0);
         
 /// @stub Implement unroll
         var al = ring_count * 3;

@@ -4,7 +4,6 @@ attribute vec3 in_Normal; // Vertex group, wrap index, wrap dir
 uniform vec3 u_vTransforms[64]; // One transform for each ring up to 64; [0] = az, [1] = po
 uniform float u_fLerp;	// Lerp value where 0 = current position, 1 = next position
 
-varying vec2 v_vTexcoord;
 varying float v_fFogDensity; // stub, temporary; was for simple depth checking
 
 const float PIPE_RADIUS = 64.0;
@@ -61,8 +60,6 @@ vec3 calculate_transform(vec3 vTransform, int iRingIndex, float fWrapAngle, floa
 }
 
 void main() {
-	v_vTexcoord = in_TextureCoord;
-	
 	int iRingIndex = int(in_Normal[0]);
 	float fWrapAngle = in_Normal[1];
 	float fWrapDir = in_Normal[2];

@@ -59,13 +59,26 @@ for (var i = 0; i < ring_count; ++i){ // Ring count
         for (var k = 0; k <= 1; ++k){ // Quad for each side
             var wrap_direction = (k == 0 ? 1 : -1);
             var wrap_angle = pi / ring_precision * j;
-            add_vertex(0, 0, i, wrap_angle, wrap_direction);
-            add_vertex(1, 0, i, wrap_angle, wrap_direction);
-            add_vertex(0, 1, i, wrap_angle, wrap_direction); 
-            
-            add_vertex(1, 0, i, wrap_angle, wrap_direction);
-            add_vertex(1, 1, i, wrap_angle, wrap_direction);
-            add_vertex(0, 1, i, wrap_angle, wrap_direction);
+            /// Note: The vertex definition order is purely cosmetic in this case
+            ///       to make all the tringle seams point in the same direction:
+            if (wrap_direction > 0){
+                add_vertex(0, 0, i, wrap_angle, wrap_direction);
+                add_vertex(1, 0, i, wrap_angle, wrap_direction);
+                add_vertex(0, 1, i, wrap_angle, wrap_direction); 
+                
+                add_vertex(1, 0, i, wrap_angle, wrap_direction);
+                add_vertex(1, 1, i, wrap_angle, wrap_direction);
+                add_vertex(0, 1, i, wrap_angle, wrap_direction);
+            }
+            else{
+                add_vertex(0, 0, i, wrap_angle, wrap_direction);
+                add_vertex(1, 0, i, wrap_angle, wrap_direction);
+                add_vertex(1, 1, i, wrap_angle, wrap_direction); 
+                
+                add_vertex(0, 0, i, wrap_angle, wrap_direction);
+                add_vertex(1, 1, i, wrap_angle, wrap_direction);
+                add_vertex(0, 1, i, wrap_angle, wrap_direction);
+            }
         }
     }
 }
