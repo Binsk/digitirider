@@ -8,7 +8,7 @@ varying vec2 v_vTexcoord;
 varying float v_fFogDensity; // stub, temporary; was for simple depth checking
 
 const float PIPE_RADIUS = 64.0;
-const float PIPE_SEGMENT_LENGTH = 64.0;
+const float PIPE_SEGMENT_LENGTH = 64.0;	// Length following the pipe between segments
 const float PIPE_SLICE_COUNT = 12.0;
 const float PI = 3.14159;
 
@@ -23,10 +23,11 @@ int imax(int value1, int value2){
 /// finally converting to cartesian.
 vec3 calculate_transform(vec3 vTransform, int iRingIndex, float fWrapAngle, float fWrapDir, vec2 vTexcoord){
 	vec3 vPosition = vec3(0, 0, 0);
+	
 	float fXLength = float(iRingIndex) * PIPE_SEGMENT_LENGTH + PIPE_SEGMENT_LENGTH * vTexcoord.x;
 		// Calculate local 'ring' first:
 	float fSliceDelta = PI / PIPE_SLICE_COUNT;
-	float fPo = fWrapAngle + fSliceDelta * vTexcoord.y;
+	float fPo = (mix(0.5, 1.0, vTransform[2]) * fWrapAngle + fSliceDelta * vTexcoord.y);
 	float fAz = PI * 0.5;
 	if (fWrapDir < 0.0){
 		fAz += PI;
@@ -39,15 +40,24 @@ vec3 calculate_transform(vec3 vTransform, int iRingIndex, float fWrapAngle, floa
 	fAz += vTransform[0];
 	
 	// Convert local coordinate system:
-	vPosition.x = PIPE_RADIUS * cos(fAz) * sin(fPo);
-	vPosition.z = PIPE_RADIUS * -sin(fAz) * sin(fPo);
-	vPosition.y = PIPE_RADIUS * cos(fPo);
+	float fPipeRadius = mix(3.0, 1.0, vTransform[2]) * PIPE_RADIUS;
+	
+	vPosition.x = fPipeRadius * cos(fAz) * -sin(fPo);
+	vPosition.z = fPipeRadius * -sin(fAz) * -sin(fPo);
+	vPosition.y = fPipeRadius * -cos(fPo);
+	
+	vec3 vRayForward = vec3(cos(vTransform[0]) * cos(vTransform[1]), sin(vTransform[1]), -sin(vTransform[0]) * cos(vTransform[1]));
+	vec3 vRayLeft = normalize(vec3(cos(vTransform[0] + PI * 0.5) * cos(vTransform[1]), sin(vTransform[1]), -sin(vTransform[0] + PI * 0.5) * cos(vTransform[1])));
+	vec3 vRayDown = normalize(vec3(cos(vTransform[0]) * cos(vTransform[1] - PI * 0.5), sin(vTransform[1] - PI * 0.5), -sin(vTransform[0]) * cos(vTransform[1] - PI * 0.5))) * mix(PIPE_RADIUS, 0.0, vTransform[2]);
+	
+	vPosition = mix(dot(vRayLeft, vPosition) * vRayLeft, vPosition, vTransform[2]);
 
 	// Convert local to 'world' (which is just a translation)
-	vPosition.x += fXLength * cos(vTransform[0]) * cos(vTransform[1]); // Forward
-	vPosition.z += fXLength * -sin(vTransform[0]) * cos(vTransform[1]);	// Right
-	vPosition.y += fXLength * sin(vTransform[1]);			// Up
-	return vPosition;
+	vPosition.x += fXLength * vRayForward.x; // Forward
+	vPosition.z += fXLength * vRayForward.z;	// Left
+	vPosition.y += fXLength * vRayForward.y;	// Up
+	
+	return vPosition + vRayDown;
 }
 
 void main() {
@@ -64,17 +74,17 @@ void main() {
 		vec3 vTransformFrom = u_vTransforms[iRingIndex];
 		vec3 vTransformTo = u_vTransforms[imax(0, iRingIndex - 1)];
 		vCoordFrom = calculate_transform(vTransformFrom, iRingIndex, fWrapAngle, fWrapDir, in_TextureCoord);
-		// vCoordTo = calculate_transform(vTransformTo, imax(iRingIndex - 1, 0), fWrapAngle, fWrapDir, vTextureCoordTo);
 		vCoordTo = calculate_transform(vTransformTo, imax(iRingIndex - 1, 0), fWrapAngle, fWrapDir, in_TextureCoord);
-		v_fFogDensity = 1.0 - pow(in_Normal[0] / 24.0, 2.0); // stub, for distinguishing depth
+/// @stub, for distinguishing depth
+		v_fFogDensity = 1.0 - pow(in_Normal[0] / 24.0, 2.0);
 	}
 	else{
 		vec3 vTransformFrom = u_vTransforms[imax(0, iRingIndex - 1)];
 		vec3 vTransformTo = u_vTransforms[imax(0, iRingIndex - 2)];
-		// vCoordFrom = calculate_transform(vTransformFrom, imax(iRingIndex - 1, 0), fWrapAngle, fWrapDir, vTextureCoordTo);
 		vCoordFrom = calculate_transform(vTransformFrom, imax(iRingIndex - 1, 0), fWrapAngle, fWrapDir, vTextureCoordTo);
 		vCoordTo = calculate_transform(vTransformTo, imax(iRingIndex - 2, 0), fWrapAngle, fWrapDir, vTextureCoordTo);
-		v_fFogDensity = 1.0 - pow(max(in_Normal[0] - 1.0, 0.0) / 24.0, 2.0); // stub, for distinguishing depth
+/// @stub, for distinguishing depth
+		v_fFogDensity = 1.0 - pow(max(in_Normal[0] - 1.0, 0.0) / 24.0, 2.0);
 	}
 	
 	// vec4 vCoordLocal = vec4(vCoordFrom.x, vCoordFrom.y, vCoordFrom.z, 1.0);

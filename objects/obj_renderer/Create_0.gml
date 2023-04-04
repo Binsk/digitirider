@@ -16,7 +16,7 @@ surface_depth_disable(true);
 surface_merged = -1;
 surface_depth_disable(false);
 
-mat_view = matrix_build_lookat(16, 0, 0, 32, 0, 0, 0, 1, 0);
+mat_view = matrix_build_lookat(64, -48, 0, 96, -48, 0, 0, 1, 0);
 mat_projection = matrix_build_projection_perspective_fov(70, 1.0, 0.01, 1536);
 
 // Vertex format color

@@ -22,3 +22,34 @@ function array_flatten(array){
     
     return newarray;
 }
+
+/// @desc   Cycles all the values in the array by one in the specified direction
+/// @param  {array}     array       array to modify in-place
+/// @param  {real}      direction   direction to shift the values
+/// @return {array}
+function array_cycle(array, direction){
+    if (not is_array(array))
+        return array;
+    
+    if (not is_real(direction))
+        return array;
+    
+    if (direction < 0){
+        var al = array_length(array);
+        var value = array[0];
+        for (var i = 0; i < al - 1; ++i)
+            array[@ i] = array[i + 1];
+        
+        array[@ al - 1] = value;
+    }
+    else if (direction > 0){
+        var al = array_length(array);
+        var value = array[al - 1];
+        for (var i = al - 1; i > 0; --i)
+            array[@ i] = array[i - 1];
+        
+        array[@ 0] = value;
+    }
+    
+    return array;
+}

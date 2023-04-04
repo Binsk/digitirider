@@ -11,6 +11,12 @@ function generate_cleared_input(){
             up : 0,
             down : 0,
             select : 0
+        },
+        game : {
+            ship : {
+                cw : 0, // When flat, this is 'left'
+                ccw : 0
+            }
         }
     };
 }
