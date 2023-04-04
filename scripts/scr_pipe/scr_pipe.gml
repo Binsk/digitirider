@@ -17,7 +17,7 @@ function PipeMorph(theta=0, phi=0, unroll=0) constructor {
         for (var i = 0; i < al; i += 3){
             array[i] = theta;
             array[i + 1] = phi;
-            array[i + 2] = 1.0; // Roll
+            array[i + 2] = unroll; // Roll
             theta += theta_delta;
             phi += phi_delta;
         }
@@ -33,11 +33,17 @@ function PipeMorph(theta=0, phi=0, unroll=0) constructor {
         var a2 = morph.construct_array(ring_count);
         var array = array_create(ring_count * 3, 1.0);
         
-/// @stub Implement unroll
+        // var segment = 1.0 / ring_count;
         var al = ring_count * 3;
         for (var i = 0; i < al; i += 3){
             array[i] = lerp(a1[i], a2[i], mlerp);
             array[i + 1] = lerp(a1[i + 1], a2[i + 1], mlerp);
+            array[i + 2] = lerp(a1[i + 2], a2[i + 2], mlerp);
+            
+            // var idx = (al - i) / 3;
+            // var start_lerp = idx * segment;
+            // var end_lerp = (idx + 1) * segment;
+            // array[i + 2] = lerp(a1[i + 2], a2[i + 2], clamp((mlerp - start_lerp) / segment, 0, 1)); 
         }
         
         return array;

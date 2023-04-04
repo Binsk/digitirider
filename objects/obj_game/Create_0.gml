@@ -18,8 +18,8 @@ camera_rotation = 0; // Around the ring or across the plane; 0 = center
 //                 new PipeMorph(-pi / 2, -pi / 2),
 //                 new PipeMorph(pi / 2, -pi / 2)];
 
-pipe_states = [ new PipeMorph(0.0, +pi / 2),
-                new PipeMorph(0.0, -pi / 2)];
+pipe_states = [ new PipeMorph(0, -pi / 2, 0),
+                new PipeMorph(0, pi / 2, 0)];
 #endregion
 
 #region INIT

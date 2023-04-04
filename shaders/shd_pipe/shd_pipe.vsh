@@ -26,7 +26,8 @@ vec3 calculate_transform(vec3 vTransform, int iRingIndex, float fWrapAngle, floa
 	float fXLength = float(iRingIndex) * PIPE_SEGMENT_LENGTH + PIPE_SEGMENT_LENGTH * vTexcoord.x;
 		// Calculate local 'ring' first:
 	float fSliceDelta = PI / PIPE_SLICE_COUNT;
-	float fPo = (mix(0.5, 1.0, vTransform[2]) * fWrapAngle + fSliceDelta * vTexcoord.y);
+	float fUnwrapMultiplier = mix(0.5, 1.0, vTransform[2]);
+	float fPo = (fUnwrapMultiplier * fWrapAngle + fSliceDelta * vTexcoord.y * fUnwrapMultiplier);
 	float fAz = PI * 0.5;
 	if (fWrapDir < 0.0){
 		fAz += PI;
@@ -39,7 +40,7 @@ vec3 calculate_transform(vec3 vTransform, int iRingIndex, float fWrapAngle, floa
 	fAz += vTransform[0];
 	
 	// Convert local coordinate system:
-	float fPipeRadius = mix(3.0, 1.0, vTransform[2]) * PIPE_RADIUS;
+	float fPipeRadius = mix(PI, 1.0, vTransform[2]) * PIPE_RADIUS;
 	
 	vPosition.x = fPipeRadius * cos(fAz) * -sin(fPo);
 	vPosition.z = fPipeRadius * -sin(fAz) * -sin(fPo);
