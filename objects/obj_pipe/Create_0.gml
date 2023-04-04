@@ -21,7 +21,7 @@ event_inherited();
 #region PROPERTIES
 ring_precision = 12; // Number of 'slices' one half of the ring
 ring_count = 32;      // Number of 'rings' to render (effectively similar to 'view distance' [1..64])
-transform_array = array_create(ring_count);
+transform_array = array_create(ring_count * 3, 1.0);
 #endregion
 
 #region METHODS
@@ -37,19 +37,11 @@ function draw(){
 
     static u_vTransforms = shader_get_uniform(shd_pipe, "u_vTransforms");
     static u_fLerp = shader_get_uniform(shd_pipe, "u_fLerp");
-    
+
     var mat_world_old = matrix_get(matrix_world);
     matrix_set(matrix_world, mat_world);
     shader_set(shd_pipe);
-    var a = [];
-    var delta = (cos(pi * current_time / 10000) * (pi * 0.25)) / ring_count;
-    var rot = 0;
-    for (var i = 0; i < ring_count; ++i){
-        array_push(a, [rot, rot, 0]);
-        rot += delta;
-    }
-
-    shader_set_uniform_f_array(u_vTransforms, array_flatten(a));
+    shader_set_uniform_f_array(u_vTransforms, transform_array);
     // Note: There should only ever be one instance of obj_game.
     shader_set_uniform_f(u_fLerp, (current_time - obj_game.start_tick_time) / obj_game.tick_speed);
     vertex_submit(vbuffer, pr_linelist, texture);

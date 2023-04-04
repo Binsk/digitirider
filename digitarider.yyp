@@ -41,6 +41,7 @@
     {"id":{"name":"obj_controller","path":"objects/obj_controller/obj_controller.yy",},},
     {"id":{"name":"obj_game","path":"objects/obj_game/obj_game.yy",},},
     {"id":{"name":"scr_array","path":"scripts/scr_array/scr_array.yy",},},
+    {"id":{"name":"scr_pipe","path":"scripts/scr_pipe/scr_pipe.yy",},},
     {"id":{"name":"obj_system","path":"objects/obj_system/obj_system.yy",},},
     {"id":{"name":"scr_input","path":"scripts/scr_input/scr_input.yy",},},
     {"id":{"name":"obj_input","path":"objects/obj_input/obj_input.yy",},},
