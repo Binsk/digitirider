@@ -31,20 +31,27 @@ function add_vertex(u, v, ring_index, wrap_angle, wrap_direction=1){
     vertex_texcoord(vbuffer, u, v);
 }
 
-function draw(){
+function draw(vrtype=pr_trianglelist, pipe_render_mode=1, depth_texture=undefined){
     if (vbuffer == -1)
         return;
 
     static u_vTransforms = shader_get_uniform(shd_pipe, "u_vTransforms");
     static u_fLerp = shader_get_uniform(shd_pipe, "u_fLerp");
+    static u_fPipeRadius = shader_get_uniform(shd_pipe, "u_fPipeRadius");
+    static u_iRenderMode = shader_get_uniform(shd_pipe, "u_iRenderMode");
+    static u_sDepthBuffer = shader_get_sampler_index(shd_pipe, "u_sDepthBuffer");
 
     var mat_world_old = matrix_get(matrix_world);
     matrix_set(matrix_world, mat_world);
     shader_set(shd_pipe);
     shader_set_uniform_f_array(u_vTransforms, transform_array);
-    // Note: There should only ever be one instance of obj_game.
     shader_set_uniform_f(u_fLerp, (current_time - obj_game.start_tick_time) / obj_game.tick_speed);
-    vertex_submit(vbuffer, pr_linelist, texture);
+    shader_set_uniform_f(u_fPipeRadius, pipe_render_mode <= 1 ? 64 : 66);
+    shader_set_uniform_i(u_iRenderMode, pipe_render_mode);
+    if (pipe_render_mode == 2 and not is_undefined(depth_texture))
+        texture_set_stage(u_sDepthBuffer, depth_texture);
+        
+    vertex_submit(vbuffer, vrtype, texture);
     shader_reset();
     matrix_set(matrix_world, mat_world_old);
 }
@@ -52,22 +59,36 @@ function draw(){
 
 #region INIT
 vbuffer = vertex_create_buffer();
-c=0;
 vertex_begin(vbuffer, obj_renderer.vformat_pipe);
 for (var i = 0; i < ring_count; ++i){ // Ring count
     for (var j = 0; j < ring_precision; ++j){ // Quad count for one half
         for (var k = 0; k <= 1; ++k){ // Quad for each side
             var wrap_direction = (k == 0 ? 1 : -1);
             var wrap_angle = pi / ring_precision * j;
-            add_vertex(0, 0, i, wrap_angle, wrap_direction);
-            add_vertex(1, 0, i, wrap_angle, wrap_direction);
-            add_vertex(0, 1, i, wrap_angle, wrap_direction); 
-            
-            add_vertex(1, 0, i, wrap_angle, wrap_direction);
-            add_vertex(1, 1, i, wrap_angle, wrap_direction);
-            add_vertex(0, 1, i, wrap_angle, wrap_direction);
+            /// Note: The vertex definition order is purely cosmetic in this case
+            ///       to make all the tringle seams point in the same direction:
+            if (wrap_direction > 0){
+                add_vertex(0, 0, i, wrap_angle, wrap_direction);
+                add_vertex(1, 0, i, wrap_angle, wrap_direction);
+                add_vertex(0, 1, i, wrap_angle, wrap_direction); 
+                
+                add_vertex(1, 0, i, wrap_angle, wrap_direction);
+                add_vertex(1, 1, i, wrap_angle, wrap_direction);
+                add_vertex(0, 1, i, wrap_angle, wrap_direction);
+            }
+            else{
+                add_vertex(0, 0, i, wrap_angle, wrap_direction);
+                add_vertex(1, 0, i, wrap_angle, wrap_direction);
+                add_vertex(1, 1, i, wrap_angle, wrap_direction); 
+                
+                add_vertex(0, 0, i, wrap_angle, wrap_direction);
+                add_vertex(1, 1, i, wrap_angle, wrap_direction);
+                add_vertex(0, 1, i, wrap_angle, wrap_direction);
+            }
         }
     }
 }
 vertex_end(vbuffer);
+
+type = RENDERABLE_TYPE.none;
 #endregion

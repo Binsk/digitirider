@@ -13,13 +13,18 @@ tick_speed_pipe = 5000;
 start_tick_time_pipe = current_time;
 signaler = new Signaler();
 camera_rotation = 0; // Around the ring or across the plane; 0 = center
-// pipe_states = [ new PipeMorph(pi / 2, pi / 2),
-//                 new PipeMorph(-pi / 2, pi / 2),
-//                 new PipeMorph(-pi / 2, -pi / 2),
-//                 new PipeMorph(pi / 2, -pi / 2)];
-
-pipe_states = [ new PipeMorph(0, pi / 2),
-                new PipeMorph(0, -pi / 2)];
+pipe_states = [ new PipeMorph(pi / 2, pi / 2),
+                new PipeMorph(-pi / 2, pi / 2),
+                new PipeMorph(-pi / 2, -pi / 2),
+                new PipeMorph(pi / 2, -pi / 2, 0.0),
+                new PipeMorph(0, 0, 0.0),
+                new PipeMorph(0, pi * 0.1, 0.0),
+                new PipeMorph(0, -pi * 0.1, 0.0),
+                new PipeMorph(0, pi * 0.1, 0.0),
+                new PipeMorph(-pi / 3, -pi / 3, 0.0)];
+                
+// pipe_states = [ new PipeMorph(pi * 0.15, 0, 1),
+//                 new PipeMorph(pi * 0.15, 0, 1)];
 #endregion
 
 #region INIT

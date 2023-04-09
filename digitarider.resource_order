@@ -4,6 +4,7 @@
     {"name":"Menu","order":1,"path":"folders/Objects/Menu.yy",},
   ],
   "ResourceOrderSettings": [
+    {"name":"shd_depth","order":2,"path":"shaders/shd_depth/shd_depth.yy",},
     {"name":"obj_renderer","order":2,"path":"objects/obj_renderer/obj_renderer.yy",},
     {"name":"obj_menu_main","order":1,"path":"objects/obj_menu_main/obj_menu_main.yy",},
     {"name":"obj_init","order":1,"path":"objects/obj_init/obj_init.yy",},

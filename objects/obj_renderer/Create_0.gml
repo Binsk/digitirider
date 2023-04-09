@@ -9,12 +9,12 @@
 ///     -   Merge transluscent surface to opaque and push to screen
 
 #region PROPERTIES
-surface_depth = -1;
-surface_opaque = -1;
-surface_transluscent = -1;
-surface_depth_disable(true);
-surface_merged = -1;
-surface_depth_disable(false);
+surface_depth = -1;     // Contains our depth-buffer; used when blending glow & transluscent items
+surface_glow = -1;      // Contains the render for 'glowy' bits; everything will be blurred
+surface_opaque = -1;    // Fully opaque or fully transparent items draw to this layer; this is the layer most used
+surface_transluscent = -1;  // Transluscent items will be blended in a special way on this layer
+surface_merged = -1;        // The final merging of layers ends up here, "full screen effects" can be applied
+surface_depth_transition = -1;    // Used to transition surfaces to work around a WebGL false positive error
 
 mat_view = matrix_build_lookat(64, -48, 0, 96, -48, 0, 0, 1, 0);
 mat_projection = matrix_build_projection_perspective_fov(70, 1.0, 0.01, 1536);
@@ -27,7 +27,6 @@ vformat_color = vertex_format_end();
 
 // Vertex format pipe
 vertex_format_begin(); // Coords are calculate in the shader
-// vertex_format_add_custom(vertex_type_float3, vertex_usage_normal);
 vertex_format_add_normal();
 vertex_format_add_texcoord();
 vformat_pipe = vertex_format_end();
@@ -42,5 +41,5 @@ function apply_matrices(){
 #endregion
 
 #region INIT
-gpu_set_cullmode(cull_counterclockwise);
+gpu_set_cullmode(cull_noculling);
 #endregion

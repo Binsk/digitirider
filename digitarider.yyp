@@ -29,6 +29,7 @@
   },
   "resources": [
     {"id":{"name":"par_menu","path":"objects/par_menu/par_menu.yy",},},
+    {"id":{"name":"shd_depth","path":"shaders/shd_depth/shd_depth.yy",},},
     {"id":{"name":"obj_renderer","path":"objects/obj_renderer/obj_renderer.yy",},},
     {"id":{"name":"obj_menu_main","path":"objects/obj_menu_main/obj_menu_main.yy",},},
     {"id":{"name":"obj_init","path":"objects/obj_init/obj_init.yy",},},
