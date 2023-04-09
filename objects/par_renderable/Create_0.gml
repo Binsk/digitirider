@@ -1,11 +1,18 @@
 /// ABOUT
 /// This object represents a basic renderable 3D object.
 
+enum RENDERABLE_TYPE{
+    none,           // Don't render (done for special handling of some renderables)
+    opaque,         // Fully opaque or fully transparent elements only; renders to depth buffer
+    transluscent,   // Transluscent elements of any kind, does NOT render to the depth buffer
+    glow            // Will render (similar to transluscent) but then be blurred and clipped w/ the depth buffer; rendered behind transluscent
+}
+
 #region PROPERTIES
 mat_world = matrix_build_identity();
 texture = -1;
 vbuffer = -1;
-is_opaque = true;   // If false, renders in opaque pass else transluscent pass
+type = RENDERABLE_TYPE.opaque;
 #endregion
 
 #region METHODS
@@ -20,8 +27,8 @@ function draw(){
 }
 
 function add_vertex(x, y, z, color=c_white, alpha=1.0){
-    if (alpha < 1.0)
-        is_opaque = false;
+    if (alpha < 1.0 and type != RENDERABLE_TYPE.glow)
+        type = RENDERABLE_TYPE.opaque;
     
     vertex_position_3d(vbuffer, x, y, z);
     vertex_color(vbuffer, color, alpha)

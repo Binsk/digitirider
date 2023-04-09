@@ -1,5 +1,5 @@
 /// @desc   Defines a pipe morph state; angles are in radians.
-function PipeMorph(theta=0, phi=0, unroll=0) constructor {
+function PipeMorph(theta=0, phi=0, unroll=1.0) constructor {
     self.theta = theta;
     self.phi = phi;
     self.unroll = unroll;
