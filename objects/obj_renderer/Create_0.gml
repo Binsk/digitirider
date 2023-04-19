@@ -15,8 +15,7 @@ surface_opaque = -1;    // Fully opaque or fully transparent items draw to this 
 surface_transluscent = -1;  // Transluscent items will be blended in a special way on this layer
 surface_merged = -1;        // The final merging of layers ends up here, "full screen effects" can be applied
 surface_depth_transition = -1;    // Used to transition surfaces to work around a WebGL false positive error
-
-mat_view = matrix_build_lookat(64, -48, 0, 96, -48, 0, 0, 1, 0);
+mat_view = matrix_build_lookat(PipeMorph.SEGMENT_LENGTH, -PipeMorph.RADIUS * 0.75, 0, PipeMorph.SEGMENT_LENGTH * 2.0, -PipeMorph.RADIUS * 0.75, 0, 0, 1, 0);
 mat_projection = matrix_build_projection_perspective_fov(70, 1.0, 0.01, 1536);
 
 // Vertex format color

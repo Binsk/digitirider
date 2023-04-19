@@ -4,12 +4,11 @@ attribute vec3 in_Normal; // Vertex group, wrap index, wrap dir
 uniform vec3 u_vTransforms[64]; // One transform for each ring up to 64; [0] = az, [1] = po
 uniform float u_fLerp;	// Lerp value where 0 = current position, 1 = next position
 uniform float u_fPipeRadius;
+uniform float u_fSegmentLength;
+uniform float u_fSliceCount;
 
 varying float v_fDepth;
 
-// const float PIPE_RADIUS = 64.0;
-const float PIPE_SEGMENT_LENGTH = 64.0;	// Length following the pipe between segments
-const float PIPE_SLICE_COUNT = 12.0;
 const float PI = 3.14159;
 
 int imax(int value1, int value2){
@@ -22,7 +21,7 @@ int imax(int value1, int value2){
 // Calculate the vertex position of the pipe:
 vec3 transform_spherical(vec3 vTransform, int iRingIndex, float fWrapAngle, float fWrapDir, vec2 vTexcoord){
 	vec3 vPosition = vec3(0, 0, 0);
-	float fSliceDelta = PI / PIPE_SLICE_COUNT;
+	float fSliceDelta = PI / u_fSliceCount;
 	
 	// Calculate local vertex position:
 	float fPo = (fWrapAngle + fSliceDelta * vTexcoord.y); // Phi
@@ -43,7 +42,7 @@ vec3 transform_spherical(vec3 vTransform, int iRingIndex, float fWrapAngle, floa
 	vPosition.y = u_fPipeRadius * -cos(fPo);
 	
 	// Convert to world coordinates
-	float fXLength = float(iRingIndex) * PIPE_SEGMENT_LENGTH + PIPE_SEGMENT_LENGTH * vTexcoord.x;
+	float fXLength = float(iRingIndex) * u_fSegmentLength + u_fSegmentLength * vTexcoord.x;
 	vec3 vRayForward = vec3(cos(vTransform[0]) * cos(vTransform[1]), sin(vTransform[1]), -sin(vTransform[0]) * cos(vTransform[1]));
 	vPosition.x += fXLength * vRayForward.x;
 	vPosition.z += fXLength * vRayForward.z;
@@ -55,7 +54,7 @@ vec3 transform_spherical(vec3 vTransform, int iRingIndex, float fWrapAngle, floa
 // Calculate the vertex position of the plane:
 vec3 transform_linear(vec3 vTransform, int iRingIndex, float fWrapAngle, float fWrapDir, vec2 vTexcoord){
 	vec3 vPosition = vec3(0, 0, 0);
-	float fIndex = floor(PIPE_SLICE_COUNT / PI * fWrapAngle); // Vertex index (used for measuring)
+	float fIndex = floor(u_fSliceCount / PI * fWrapAngle); // Vertex index (used for measuring)
 	float fAz = PI * 0.5;
 	
 	fAz += vTransform[0];
@@ -66,7 +65,7 @@ vec3 transform_linear(vec3 vTransform, int iRingIndex, float fWrapAngle, float f
 	vPosition.y = -u_fPipeRadius;
 	
 	// Convert to world coordinates:
-	float fXLength = float(iRingIndex) * PIPE_SEGMENT_LENGTH + PIPE_SEGMENT_LENGTH * vTexcoord.x;
+	float fXLength = float(iRingIndex) * u_fSegmentLength + u_fSegmentLength * vTexcoord.x;
 	vec3 vRayForward = vec3(cos(vTransform[0]) * cos(vTransform[1]), sin(vTransform[1]), -sin(vTransform[0]) * cos(vTransform[1]));
 	vPosition.x += fXLength * vRayForward.x;
 	vPosition.z += fXLength * vRayForward.z;

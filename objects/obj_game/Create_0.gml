@@ -37,9 +37,9 @@ if (instance_number(obj_game) > 1){
 
 #region METHODS
 function update_camera(){
-    var ysin = -dcos(camera_rotation) * 48;
-    var zsin = -dsin(camera_rotation) * 48;
-    obj_renderer.mat_view = matrix_build_lookat(64, ysin, zsin, 96, ysin, zsin, 0, dcos(camera_rotation), dsin(camera_rotation));
+    var ysin = -dcos(camera_rotation) * PipeMorph.RADIUS * 0.75;
+    var zsin = -dsin(camera_rotation) * PipeMorph.RADIUS * 0.75;
+    obj_renderer.mat_view = matrix_build_lookat(PipeMorph.SEGMENT_LENGTH, ysin, zsin, PipeMorph.SEGMENT_LENGTH * 2.0, ysin, zsin, 0, dcos(camera_rotation), dsin(camera_rotation));
 }
 #endregion
 

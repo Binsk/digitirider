@@ -3,17 +3,20 @@ function PipeMorph(theta=0, phi=0, unroll=1.0) constructor {
     self.theta = theta;
     self.phi = phi;
     self.unroll = unroll;
+    static RADIUS = 64;         // Radius of the pipe
+    static SEGMENT_LENGTH = 64; // Length of each ring segment extrusion
+    static RING_COUNT = 32;     // Number of rings to render (aka., how long the pipe is)
+    static RING_SLICES = 12;    // Number of slices per ring (aka., precision of the ring circle)
     
     /// @desc   Generate a shader-compatable array to morph the pipe with the
     ///         structures current angles.
-    function construct_array(ring_count=32){
-        var array = array_create(ring_count * 3);
-        var theta_delta = self.theta / ring_count;
+    function construct_array(){
+        var array = array_create(RING_COUNT * 3);
+        var theta_delta = self.theta / RING_COUNT;
         var theta = 0;
-        var phi_delta = self.phi / ring_count;
+        var phi_delta = self.phi / RING_COUNT;
         var phi = 0;
-/// @stub   Implement unroll 
-        var al = ring_count * 3;
+        var al = RING_COUNT * 3;
         for (var i = 0; i < al; i += 3){
             array[i] = theta;
             array[i + 1] = phi;
@@ -28,24 +31,23 @@ function PipeMorph(theta=0, phi=0, unroll=1.0) constructor {
     /// @desc   Generates a shader-comatible array to merph teh pipe with a
     ///         lerped value between this structure's values and the specified
     ///         structures values.
-    function construct_array_lerp(morph, mlerp=0.5, ring_count=32){
-        var a1 = construct_array(ring_count);
-        var a2 = morph.construct_array(ring_count);
-        var array = array_create(ring_count * 3, 1.0);
+    function construct_array_lerp(morph, mlerp=0.5){
+        var a1 = construct_array(RING_COUNT);
+        var a2 = morph.construct_array(RING_COUNT);
+        var array = array_create(RING_COUNT * 3, 1.0);
         
-        // var segment = 1.0 / ring_count;
-        var al = ring_count * 3;
+        var al = RING_COUNT * 3;
         for (var i = 0; i < al; i += 3){
             array[i] = lerp(a1[i], a2[i], mlerp);
             array[i + 1] = lerp(a1[i + 1], a2[i + 1], mlerp);
             array[i + 2] = lerp(a1[i + 2], a2[i + 2], mlerp);
-            
-            // var idx = (al - i) / 3;
-            // var start_lerp = idx * segment;
-            // var end_lerp = (idx + 1) * segment;
-            // array[i + 2] = lerp(a1[i + 2], a2[i + 2], clamp((mlerp - start_lerp) / segment, 0, 1)); 
         }
         
         return array;
     }
 }
+
+// We must create at least one PipeMorph so that the static variables are initialized.
+// This allows direct access by other systems down the road, similar to a global variable.
+var pm = new PipeMorph();
+delete pm;

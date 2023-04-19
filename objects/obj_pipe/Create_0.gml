@@ -19,9 +19,7 @@ event_inherited();
 ///     rotation or moving the player in space at all.
 
 #region PROPERTIES
-ring_precision = 12; // Number of 'slices' one half of the ring
-ring_count = 32;      // Number of 'rings' to render (effectively similar to 'view distance' [1..64])
-transform_array = array_create(ring_count * 3, 1.0);
+transform_array = array_create(PipeMorph.RING_COUNT * 3, 1.0); // Transformation data between two pipe morphs, formatted for the shader
 #endregion
 
 #region METHODS
@@ -38,6 +36,8 @@ function draw(vrtype=pr_trianglelist, pipe_render_mode=1, depth_texture=undefine
     static u_vTransforms = shader_get_uniform(shd_pipe, "u_vTransforms");
     static u_fLerp = shader_get_uniform(shd_pipe, "u_fLerp");
     static u_fPipeRadius = shader_get_uniform(shd_pipe, "u_fPipeRadius");
+    static u_fSegmentLength = shader_get_uniform(shd_pipe, "u_fSegmentLength");
+    static u_fSliceCount = shader_get_uniform(shd_pipe, "u_fSliceCount");
     static u_iRenderMode = shader_get_uniform(shd_pipe, "u_iRenderMode");
     static u_sDepthBuffer = shader_get_sampler_index(shd_pipe, "u_sDepthBuffer");
 
@@ -46,7 +46,9 @@ function draw(vrtype=pr_trianglelist, pipe_render_mode=1, depth_texture=undefine
     shader_set(shd_pipe);
     shader_set_uniform_f_array(u_vTransforms, transform_array);
     shader_set_uniform_f(u_fLerp, (current_time - obj_game.start_tick_time) / obj_game.tick_speed);
-    shader_set_uniform_f(u_fPipeRadius, pipe_render_mode <= 1 ? 64 : 66);
+    shader_set_uniform_f(u_fPipeRadius, pipe_render_mode <= 1 ? PipeMorph.RADIUS : PipeMorph.RADIUS + 2);
+    shader_set_uniform_f(u_fSegmentLength, PipeMorph.SEGMENT_LENGTH);
+    shader_set_uniform_f(u_fSliceCount, PipeMorph.RING_SLICES);
     shader_set_uniform_i(u_iRenderMode, pipe_render_mode);
     if (pipe_render_mode == 2 and not is_undefined(depth_texture))
         texture_set_stage(u_sDepthBuffer, depth_texture);
@@ -60,11 +62,11 @@ function draw(vrtype=pr_trianglelist, pipe_render_mode=1, depth_texture=undefine
 #region INIT
 vbuffer = vertex_create_buffer();
 vertex_begin(vbuffer, obj_renderer.vformat_pipe);
-for (var i = 0; i < ring_count; ++i){ // Ring count
-    for (var j = 0; j < ring_precision; ++j){ // Quad count for one half
+for (var i = 0; i < PipeMorph.RING_COUNT; ++i){ // Ring count
+    for (var j = 0; j < PipeMorph.RING_SLICES; ++j){ // Quad count for one half
         for (var k = 0; k <= 1; ++k){ // Quad for each side
             var wrap_direction = (k == 0 ? 1 : -1);
-            var wrap_angle = pi / ring_precision * j;
+            var wrap_angle = pi / PipeMorph.RING_SLICES * j;
             /// Note: The vertex definition order is purely cosmetic in this case
             ///       to make all the tringle seams point in the same direction:
             if (wrap_direction > 0){
