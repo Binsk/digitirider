@@ -22,10 +22,10 @@ pipe_states = [ new PipeMorph(pi / 2, pi / 2),
                 new PipeMorph(0, -pi * 0.1, 0.0),
                 new PipeMorph(0, pi * 0.1, 0.0),
                 new PipeMorph(-pi / 3, -pi / 3, 0.0)];
-                
-// pipe_states = [ new PipeMorph(pi * 0.15, 0, 1),
-//                 new PipeMorph(pi * 0.15, 0, 1)];
 #endregion
+
+// pipe_states = [ new PipeMorph(0, 0, 1),
+//                 new PipeMorph(0, 0, 0)];
 
 #region INIT
 if (instance_number(obj_game) > 1){
