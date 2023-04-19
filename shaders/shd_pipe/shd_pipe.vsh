@@ -19,47 +19,70 @@ int imax(int value1, int value2){
 	return value2;
 }
 
+// Calculate the vertex position of the pipe:
+vec3 transform_spherical(vec3 vTransform, int iRingIndex, float fWrapAngle, float fWrapDir, vec2 vTexcoord){
+	vec3 vPosition = vec3(0, 0, 0);
+	float fSliceDelta = PI / PIPE_SLICE_COUNT;
+	
+	// Calculate local vertex position:
+	float fPo = (fWrapAngle + fSliceDelta * vTexcoord.y); // Phi
+	float fAz = PI * 0.5; // Theta
+	if (fWrapDir < 0.0){
+		fAz += PI;
+		fPo += vTransform[1]; // Relative x/z-axis rotation
+	}
+	else
+		fPo -= vTransform[1];
+	
+	// Add y-axis rotation:
+	fAz += vTransform[0];
+	
+	// Convert to ring coordinates:
+	vPosition.x = u_fPipeRadius * cos(fAz) * -sin(fPo);
+	vPosition.z = u_fPipeRadius * -sin(fAz) * -sin(fPo);
+	vPosition.y = u_fPipeRadius * -cos(fPo);
+	
+	// Convert to world coordinates
+	float fXLength = float(iRingIndex) * PIPE_SEGMENT_LENGTH + PIPE_SEGMENT_LENGTH * vTexcoord.x;
+	vec3 vRayForward = vec3(cos(vTransform[0]) * cos(vTransform[1]), sin(vTransform[1]), -sin(vTransform[0]) * cos(vTransform[1]));
+	vPosition.x += fXLength * vRayForward.x;
+	vPosition.z += fXLength * vRayForward.z;
+	vPosition.y += fXLength * vRayForward.y;
+	
+	return vPosition;
+}
+
+// Calculate the vertex position of the plane:
+vec3 transform_linear(vec3 vTransform, int iRingIndex, float fWrapAngle, float fWrapDir, vec2 vTexcoord){
+	vec3 vPosition = vec3(0, 0, 0);
+	float fIndex = floor(PIPE_SLICE_COUNT / PI * fWrapAngle); // Vertex index (used for measuring)
+	float fAz = PI * 0.5;
+	
+	fAz += vTransform[0];
+	float fLength = (fIndex + vTexcoord.y) * (u_fPipeRadius * 0.25) * -fWrapDir;
+	
+	vPosition.x = fLength * cos(fAz);
+	vPosition.z = fLength * -sin(fAz);
+	vPosition.y = -u_fPipeRadius;
+	
+	// Convert to world coordinates:
+	float fXLength = float(iRingIndex) * PIPE_SEGMENT_LENGTH + PIPE_SEGMENT_LENGTH * vTexcoord.x;
+	vec3 vRayForward = vec3(cos(vTransform[0]) * cos(vTransform[1]), sin(vTransform[1]), -sin(vTransform[0]) * cos(vTransform[1]));
+	vPosition.x += fXLength * vRayForward.x;
+	vPosition.z += fXLength * vRayForward.z;
+	vPosition.y += fXLength * vRayForward.y;
+	
+	return vPosition;
+}
+
 /// Calculate the transform for our vertex, everything is done in spherical coordinates before
 /// finally converting to cartesian.
 vec3 calculate_transform(vec3 vTransform, int iRingIndex, float fWrapAngle, float fWrapDir, vec2 vTexcoord){
-	vec3 vPosition = vec3(0, 0, 0);
-	
-	float fXLength = float(iRingIndex) * PIPE_SEGMENT_LENGTH + PIPE_SEGMENT_LENGTH * vTexcoord.x;
-		// Calculate local 'ring' first:
-	float fSliceDelta = PI / PIPE_SLICE_COUNT;
-	float fUnwrapMultiplier = mix(0.5, 1.0, vTransform[2]);
-	float fPo = (fUnwrapMultiplier * fWrapAngle + fSliceDelta * vTexcoord.y * fUnwrapMultiplier);
-	float fAz = PI * 0.5;
-	if (fWrapDir < 0.0){
-		fAz += PI;
-		fPo += vTransform[1]; // Add relative x/z-axis rotation
-	}
-	else
-		fPo -= vTransform[1];	
-	
-		// Add y-axis rotation:
-	fAz += vTransform[0];
-	
-	// Convert local coordinate system:
-	float fPipeRadius = mix(PI, 1.0, vTransform[2]) * u_fPipeRadius;
-	
-	vPosition.x = fPipeRadius * cos(fAz) * -sin(fPo);
-	vPosition.z = fPipeRadius * -sin(fAz) * -sin(fPo);
-	vPosition.y = fPipeRadius * -cos(fPo);
-	
-	vec3 vRayForward = vec3(cos(vTransform[0]) * cos(vTransform[1]), sin(vTransform[1]), -sin(vTransform[0]) * cos(vTransform[1]));
-	vec3 vRayLeft = normalize(vec3(cos(vTransform[0] + PI * 0.5) * cos(vTransform[1]), sin(vTransform[1]), -sin(vTransform[0] + PI * 0.5) * cos(vTransform[1])));
-	vec3 vRayDown = normalize(vec3(cos(vTransform[0]) * cos(vTransform[1] - PI * 0.5), sin(vTransform[1] - PI * 0.5), -sin(vTransform[0]) * cos(vTransform[1] - PI * 0.5))) * mix(u_fPipeRadius, 0.0, vTransform[2]);
-	
-	vPosition = mix(dot(vRayLeft, vPosition) * vRayLeft, vPosition, vTransform[2]);
-
-	// Convert local to 'world' (which is just a translation)
-	vPosition.x += fXLength * vRayForward.x; // Forward
-	vPosition.z += fXLength * vRayForward.z;	// Left
-	vPosition.y += fXLength * vRayForward.y;	// Up
-	
-	return vPosition + vRayDown;
+	vec3 fCoordA = transform_spherical(vTransform, iRingIndex, fWrapAngle, fWrapDir, vTexcoord);
+	vec3 fCoordB = transform_linear(vTransform, iRingIndex, fWrapAngle, fWrapDir, vTexcoord);
+	return mix(fCoordB, fCoordA, vTransform[2]);
 }
+
 
 void main() {
 	int iRingIndex = int(in_Normal[0]);
@@ -82,9 +105,9 @@ void main() {
 		vCoordTo = calculate_transform(vTransformTo, imax(iRingIndex - 2, 0), fWrapAngle, fWrapDir, vTextureCoordTo);
 	}
 	
-	// vec4 vCoordLocal = vec4(vCoordFrom.x, vCoordFrom.y, vCoordFrom.z, 1.0);
 	vec4 vCoordLocal = vec4(mix(vCoordFrom.x, vCoordTo.x, u_fLerp), mix(vCoordFrom.y, vCoordTo.y, u_fLerp), mix(vCoordFrom.z, vCoordTo.z, u_fLerp), 1.0);
 	vec4 vCoordProj = gm_Matrices[MATRIX_WORLD_VIEW_PROJECTION] * vCoordLocal;
+
 	gl_Position = vCoordProj;
 	v_fDepth = clamp(vCoordProj.z / 1536.0, 0.0, 1.0);
 }
