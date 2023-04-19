@@ -1,6 +1,6 @@
 attribute vec3 in_Position;
 
-varying v_fDepth;
+varying float v_fDepth;
 
 void main() {
 	vec4 object_space_pos = vec4(in_Position.x, in_Position.y, in_Position.z, 1.0);
