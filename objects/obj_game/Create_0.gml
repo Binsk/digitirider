@@ -24,8 +24,8 @@ pipe_states = [ new PipeMorph(pi / 2, pi / 2),
                 new PipeMorph(-pi / 3, -pi / 3, 0.0)];
 #endregion
 
-// pipe_states = [ new PipeMorph(0, 0, 1),
-//                 new PipeMorph(0, 0, 0)];
+pipe_states = [ new PipeMorph(+pi / 2, 0, 0),
+                new PipeMorph(-pi / 2, 0, 0)];
 
 #region INIT
 if (instance_number(obj_game) > 1){
@@ -37,9 +37,38 @@ if (instance_number(obj_game) > 1){
 
 #region METHODS
 function update_camera(){
-    var ysin = -dcos(camera_rotation) * 48;
-    var zsin = -dsin(camera_rotation) * 48;
-    obj_renderer.mat_view = matrix_build_lookat(64, ysin, zsin, 96, ysin, zsin, 0, dcos(camera_rotation), dsin(camera_rotation));
+    static indx = 0;
+    
+    if (keyboard_check_pressed(vk_up))
+        indx ++;
+    else if (keyboard_check_pressed(vk_down))
+        indx --;
+
+    var pipe_lerp = (current_time - start_tick_time_pipe) / tick_speed_pipe;
+    var theta = lerp(pipe_states[0].theta, pipe_states[1].theta, pipe_lerp);
+    var phi = lerp(pipe_states[0].phi, pipe_states[1].phi, pipe_lerp);
+    var unroll = lerp(pipe_states[0].unroll, pipe_states[1].unroll, pipe_lerp);
+    var position_from_plane = pipe_states[0].calculate_position_on_plane(indx, camera_rotation, theta, phi, {y:24});
+    var position_to_plane = pipe_states[0].calculate_position_on_plane(indx + 1, camera_rotation, theta, phi, {y:24});
+    
+    var position_from_ring = pipe_states[0].calculate_position_on_ring(indx, camera_rotation, theta, phi, PipeMorph.RADIUS, {y:24});
+    var position_to_ring = pipe_states[0].calculate_position_on_ring(indx + 1, camera_rotation, theta, phi, PipeMorph.RADIUS, {y:24});
+
+    var position_from = {
+        x : lerp(position_from_plane.x, position_from_ring.x, unroll),
+        y : lerp(position_from_plane.y, position_from_ring.y, unroll),
+        z : lerp(position_from_plane.z, position_from_ring.z, unroll)
+    };
+    
+    var position_to = {
+        x : lerp(position_to_plane.x, position_to_ring.x, unroll),
+        y : lerp(position_to_plane.y, position_to_ring.y, unroll),
+        z : lerp(position_to_plane.z, position_to_ring.z, unroll)
+    };
+
+    obj_renderer.mat_view = matrix_build_lookat(position_from.x, position_from.y, position_from.z,
+                                                position_to.x, position_to.y, position_to.z, 
+                                                0, 1, 0);
 }
 #endregion
 
@@ -47,12 +76,10 @@ function update_camera(){
 /// @stub test controls, replace with proper smooth accel
 obj_input.signaler.add_signal("game.ship.cw", function(){
     var dt = delta_time / 1000000;
-   camera_rotation = mod2(camera_rotation + 90 * dt, 360); 
-   update_camera();
+    camera_rotation = clamp(camera_rotation + pi / 2 * dt, -pi, pi);
 });
 obj_input.signaler.add_signal("game.ship.ccw", function(){
     var dt = delta_time / 1000000;
-   camera_rotation = mod2(camera_rotation - 90 * dt, 360); 
-   update_camera();
+    camera_rotation = clamp(camera_rotation - pi / 2 * dt, -pi, pi);
 });
 #endregion
