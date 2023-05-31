@@ -19,7 +19,7 @@ int imax(int value1, int value2){
 }
 
 // Calculate the vertex position of the pipe:
-vec3 transform_spherical(vec3 vTransform, int iRingIndex, float fWrapAngle, float fWrapDir, vec2 vTexcoord){
+vec3 calculate_ring_transform(vec3 vTransform, int iRingIndex, float fWrapAngle, float fWrapDir, vec2 vTexcoord){
 	vec3 vPosition = vec3(0, 0, 0);
 	float fSliceDelta = PI / u_fSliceCount;
 	
@@ -52,7 +52,7 @@ vec3 transform_spherical(vec3 vTransform, int iRingIndex, float fWrapAngle, floa
 }
 
 // Calculate the vertex position of the plane:
-vec3 transform_linear(vec3 vTransform, int iRingIndex, float fWrapAngle, float fWrapDir, vec2 vTexcoord){
+vec3 calculate_plane_transform(vec3 vTransform, int iRingIndex, float fWrapAngle, float fWrapDir, vec2 vTexcoord){
 	vec3 vPosition = vec3(0, 0, 0);
 	float fIndex = floor(u_fSliceCount / PI * fWrapAngle); // Vertex index (used for measuring)
 	float fAz = PI * 0.5;
@@ -62,7 +62,7 @@ vec3 transform_linear(vec3 vTransform, int iRingIndex, float fWrapAngle, float f
 	
 	vPosition.x = fLength * cos(fAz);
 	vPosition.z = fLength * -sin(fAz);
-	vPosition.y = -u_fPipeRadius;
+	vPosition.y = 0.0;
 	
 	// Convert to world coordinates:
 	float fXLength = float(iRingIndex) * u_fSegmentLength + u_fSegmentLength * vTexcoord.x;
@@ -77,8 +77,8 @@ vec3 transform_linear(vec3 vTransform, int iRingIndex, float fWrapAngle, float f
 /// Calculate the transform for our vertex, everything is done in spherical coordinates before
 /// finally converting to cartesian.
 vec3 calculate_transform(vec3 vTransform, int iRingIndex, float fWrapAngle, float fWrapDir, vec2 vTexcoord){
-	vec3 fCoordA = transform_spherical(vTransform, iRingIndex, fWrapAngle, fWrapDir, vTexcoord);
-	vec3 fCoordB = transform_linear(vTransform, iRingIndex, fWrapAngle, fWrapDir, vTexcoord);
+	vec3 fCoordA = calculate_ring_transform(vTransform, iRingIndex, fWrapAngle, fWrapDir, vTexcoord);
+	vec3 fCoordB = calculate_plane_transform(vTransform, iRingIndex, fWrapAngle, fWrapDir, vTexcoord);
 	return mix(fCoordB, fCoordA, vTransform[2]);
 }
 

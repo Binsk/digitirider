@@ -53,3 +53,27 @@ function array_cycle(array, direction){
     
     return array;
 }
+
+/// @desc   Given two arrays, generates a new array where 
+///         size=min(len(array_1), len(array_2)) and each element is determined
+///         by some function that takes a value from array_1 as argument0 and
+///         a value from array_2 as argument1.
+/// @param  {array} array_1     first array to pass to the function
+/// @param  {array} array_2     second array to pass to the function
+/// @param  {function} func     function to determine what value is in each slot
+/// @param  {array} argv=[]     optional arguments to pass along-side the arrays
+function array_process_array(array_1, array_2, func, args=[]){
+    var min_length = min(array_length(array_1), array_length(array_2));
+    var array = array_create(min_length);
+    var argv = array_create(array_length(args) + 2);
+    for (var i = 0; i < array_length(args); ++i)
+        argv[2 + i] = args[i];
+    
+    for (var i = 0; i < min_length; ++i){
+        argv[0] = array_1[i];
+        argv[1] = array_2[i];
+        array[i] = callv(func, argv);
+    }
+    
+    return array;
+}

@@ -25,7 +25,7 @@
   "isEcma": false,
   "LibraryEmitters": [],
   "MetaData": {
-    "IDEVersion": "2023.2.1.75",
+    "IDEVersion": "2023.600.0.337",
   },
   "resources": [
     {"id":{"name":"par_menu","path":"objects/par_menu/par_menu.yy",},},
@@ -36,7 +36,7 @@
     {"id":{"name":"room_game","path":"rooms/room_game/room_game.yy",},},
     {"id":{"name":"room_init","path":"rooms/room_init/room_init.yy",},},
     {"id":{"name":"shd_pipe","path":"shaders/shd_pipe/shd_pipe.yy",},},
-    {"id":{"name":"scr_print_debug","path":"scripts/scr_print_debug/scr_print_debug.yy",},},
+    {"id":{"name":"scr_debug","path":"scripts/scr_debug/scr_debug.yy",},},
     {"id":{"name":"scr_string","path":"scripts/scr_string/scr_string.yy",},},
     {"id":{"name":"scr_signaler","path":"scripts/scr_signaler/scr_signaler.yy",},},
     {"id":{"name":"obj_controller","path":"objects/obj_controller/obj_controller.yy",},},

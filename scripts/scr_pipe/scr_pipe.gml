@@ -1,12 +1,14 @@
-/// @desc   Defines a pipe morph state; angles are in radians.
+/// @desc   Defines a pipe morph state; angles are in radians and coordinates are
+///         spherical.
 function PipeMorph(theta=0, phi=0, unroll=1.0) constructor {
-    self.theta = theta;
-    self.phi = phi;
-    self.unroll = unroll;
     static RADIUS = 64;         // Radius of the pipe
     static SEGMENT_LENGTH = 64; // Length of each ring segment extrusion
     static RING_COUNT = 32;     // Number of rings to render (aka., how long the pipe is)
     static RING_SLICES = 12;    // Number of slices per ring (aka., precision of the ring circle)
+    
+    self.theta = theta;
+    self.phi = phi;
+    self.unroll = unroll;
     
     /// @desc   Generate a shader-compatable array to morph the pipe with the
     ///         structures current angles.
@@ -44,6 +46,98 @@ function PipeMorph(theta=0, phi=0, unroll=1.0) constructor {
         }
         
         return array;
+    }
+    
+    /// @desc Calculates the 3D cartesian position for a specified segment given the
+    ///       angle around the ring, in radians. 0 radians is the bottom of the ring.
+    function calculate_position_on_ring(index, angle, theta=self.theta, phi=self.phi, radius=PipeMorph.RADIUS, local_offsets={}){
+        var position = {x : 0, y : 0, z : 0};
+        
+        if (is_undefined(local_offsets[$ "x"])) local_offsets.x = 0;
+        if (is_undefined(local_offsets[$ "y"])) local_offsets.y = 0;
+        if (is_undefined(local_offsets[$ "z"])) local_offsets.z = 0;
+        
+        if (index < 0 or index >= RING_COUNT) // Out-of-bounds
+            return undefined;
+            
+        var vertex_index = RING_SLICES / pi * abs(angle * 0.5);
+        
+        // Calculate local coordinates:
+        var theta_delta = theta / RING_COUNT;
+        var phi_delta = phi / RING_COUNT;
+        
+        var gtheta = theta_delta * index;
+        var gphi = phi_delta * index;
+        theta = pi * 0.5 + gtheta;
+        phi = angle;
+        if (sign(angle) < 0){
+            theta += gtheta;
+            phi += gphi;
+        }
+        else
+            phi -= gphi;
+            
+        position.x = radius * cos(theta) * -sin(phi);
+        position.z = radius * -sin(theta) * -sin(phi);
+        position.y = radius * -cos(phi);
+        
+        // Convert to world coordinates:
+        var slength = (index + 1) * SEGMENT_LENGTH;
+        var vforward = {
+            x : cos(gtheta) * cos(gphi),
+            y : sin(gphi),
+            z : -sin(gtheta) * cos(gphi)
+        };
+        
+        position.x += vforward.x * slength;
+        position.z += vforward.z * slength;
+        position.y += vforward.y * slength;
+        
+        return position;
+    }
+    
+    /// @desc Calculates the 3D cartesian position for the specified segment given the
+    ///       angle around the ring, in radians. 0 radians is the center of the plane.
+    ///       Returns "undefined" if an error occurred.
+    function calculate_position_on_plane(index, angle, theta=self.theta, phi=self.phi, local_offsets={}){
+        var position = {x : 0, y : 0, z : 0};
+        
+        if (is_undefined(local_offsets[$ "x"])) local_offsets.x = 0;
+        if (is_undefined(local_offsets[$ "y"])) local_offsets.y = 0;
+        if (is_undefined(local_offsets[$ "z"])) local_offsets.z = 0;
+        
+        if (index < 0 or index >= RING_COUNT) // Out-of-bounds
+            return undefined;
+        
+        var vertex_index = RING_SLICES / pi * abs(angle * 0.5);
+        
+        // Calculate local coordinates:
+        var theta_delta = theta / RING_COUNT;
+        var phi_delta = phi / RING_COUNT;
+        
+        var gtheta = theta_delta * index;
+        var gphi = phi_delta * index;
+        
+        theta = pi * 0.5 + gtheta;
+        var length = vertex_index * RADIUS * 0.25 * sign(angle); // From center
+        position.x = length * cos(theta) + local_offsets.x;
+        position.z = length * -sin(theta) + local_offsets.z;
+        position.y = local_offsets.y;
+    
+        // Calculate world coordinates:
+        // Note +1 because rendering actually bases coordinates off the NEXT index
+        var slength = (index + 1) * SEGMENT_LENGTH; // From start of pipe
+        var vforward = {
+            x : cos(gtheta) * cos(gphi),
+            y : sin(gphi),
+            z : -sin(gtheta) * cos(gphi)
+        };
+        
+        position.x += vforward.x * slength;
+        position.z += vforward.z * slength;
+        position.y += vforward.y * slength;
+        
+        return position;
     }
 }
 

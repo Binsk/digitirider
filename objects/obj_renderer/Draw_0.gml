@@ -40,6 +40,7 @@ with (par_renderable){
     
     draw();
 }
+
 shader_reset();
 
 with (obj_pipe) // Uses a custom shader; it can handle depth writing automatically
@@ -61,6 +62,7 @@ with (par_renderable){
         
     draw();
 }
+
 shader_reset();
 
 /// @note Again, handles its own rendering shader due to the vertex morphing
